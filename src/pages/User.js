@@ -3,33 +3,8 @@ import UserForm from "./Forms/UserForm";
 import DeleteButton from "../components/DeleteButton.js";
 import toast from "react-hot-toast";
 
-// Mock data
-const mockUsers = [
-  {
-    id: 1,
-    userName: "johndoe",
-    fullName: "John Doe",
-    email: "johndoe@example.com",
-    phoneNumber: "0123456789",
-    address: "123 Main St, City, Country",
-  },
-  {
-    id: 2,
-    userName: "janedoe",
-    fullName: "Jane Doe",
-    email: "janedoe@example.com",
-    phoneNumber: "0987654321",
-    address: "456 Elm St, City, Country",
-  },
-  {
-    id: 3,
-    userName: "bobsmith",
-    fullName: "Bob Smith",
-    email: "bobsmith@example.com",
-    phoneNumber: "0912345678",
-    address: "789 Oak St, City, Country",
-  },
-];
+// Import các service từ userService
+import { getUsers, updateUser, deleteUser } from "../services/userService";
 
 const User = () => {
   const [users, setUsers] = useState([]);
@@ -40,13 +15,14 @@ const User = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Fetch users từ API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = mockUsers;
+        const data = await getUsers();
         setUsers(data);
       } catch (error) {
-        console.log("Failed to fetch users");
+        console.log("Failed to fetch users", error);
       }
     };
 
@@ -55,7 +31,7 @@ const User = () => {
 
   useEffect(() => {
     const filtered = users.filter((user) =>
-      user.userName.toLowerCase().includes(searchTerm.toLowerCase())
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
@@ -70,11 +46,13 @@ const User = () => {
     setDeleteModalOpen(true);
   };
 
-  const handleSubmitUser = (userData) => {
+  // Handle cập nhật người dùng
+  const handleSubmitUser = async (userData) => {
     try {
+      const updatedUser = await updateUser(editData.id, userData);
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.id === editData.id ? { ...editData, ...userData } : user
+          user.id === editData.id ? { ...editData, ...updatedUser } : user
         )
       );
       toast.success("User updated successfully");
@@ -85,8 +63,10 @@ const User = () => {
     }
   };
 
-  const handleDeleteUser = (id) => {
+  // Handle xóa người dùng
+  const handleDeleteUser = async (id) => {
     try {
+      await deleteUser(id);
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
       toast.success("User deleted successfully");
     } catch (error) {
@@ -118,10 +98,10 @@ const User = () => {
           <thead>
             <tr className='bg-gray-100 border-b border-gray-200'>
               <th className='px-4 py-2 text-left text-sm font-medium text-gray-600'>
-                Username
+                Full Name
               </th>
               <th className='px-4 py-2 text-left text-sm font-medium text-gray-600'>
-                Full Name
+                Role
               </th>
               <th className='px-4 py-2 text-left text-sm font-medium text-gray-600'>
                 Email
@@ -143,17 +123,13 @@ const User = () => {
                 key={user.id}
                 className='border-b hover:bg-gray-100 transition-colors'
               >
-                <td className='px-4 py-3 text-sm text-gray-700'>
-                  {user.userName}
-                </td>
-                <td className='px-4 py-3 text-sm text-gray-700'>
-                  {user.fullName}
-                </td>
+                <td className='px-4 py-3 text-sm text-gray-700'>{user.name}</td>
+                <td className='px-4 py-3 text-sm text-gray-700'>{user.role}</td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   {user.email}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {user.phoneNumber}
+                  {user.phone}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   {user.address}

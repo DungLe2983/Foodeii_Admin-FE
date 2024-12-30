@@ -2,37 +2,14 @@ import React, { useEffect, useState } from "react";
 import CategoriesForm from "../pages/Forms/CategoriesForm.js";
 import DeleteButton from "../components/DeleteButton.js";
 import toast from "react-hot-toast";
+import {
+  createCategory,
+  deleteCategory,
+  getAllCategories,
+  updateCategory,
+} from "../services/categoryService";
 
 const Categories = () => {
-  // Dữ liệu giả cho website bán thực phẩm sạch
-  const initialCategories = [
-    {
-      id: "1",
-      name: "Rau Củ Quả",
-      description: "Các loại rau củ quả tươi sạch, không chất bảo quản.",
-    },
-    {
-      id: "2",
-      name: "Thịt Sạch",
-      description: "Các loại thịt bò, thịt heo, gà đảm bảo chất lượng.",
-    },
-    {
-      id: "3",
-      name: "Hải Sản Tươi",
-      description: "Hải sản tươi sống, đánh bắt từ các vùng biển sạch.",
-    },
-    {
-      id: "4",
-      name: "Trái Cây Hữu Cơ",
-      description: "Trái cây hữu cơ được trồng theo tiêu chuẩn quốc tế.",
-    },
-    {
-      id: "5",
-      name: "Đồ Uống Lành Mạnh",
-      description: "Các loại nước ép, sinh tố, và đồ uống tốt cho sức khỏe.",
-    },
-  ];
-
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -41,13 +18,19 @@ const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Lấy dữ liệu giả
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setCategories(initialCategories); // Sử dụng dữ liệu giả
-      setIsLoading(false);
-    }, 500); // Giả lập thời gian tải dữ liệu
+    const fetchCategories = async () => {
+      setIsLoading(true);
+      try {
+        const categoriesData = await getAllCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        toast.error("Không thể tải danh mục");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Lọc danh sách theo từ khóa tìm kiếm
@@ -70,47 +53,42 @@ const Categories = () => {
     setDeleteModalOpen(true);
   };
 
-  const handleSubmitCategory = (categoryData) => {
+  const handleSubmitCategory = async (categoryData) => {
     setIsLoading(true);
     try {
       if (editData) {
+        const updatedCategory = await updateCategory(editData.id, categoryData);
         setCategories((prevCategories) =>
           prevCategories.map((category) =>
-            category.id === editData.id
-              ? { ...category, ...categoryData }
-              : category
+            category.id === editData.id ? updatedCategory : category
           )
         );
         toast.success("Danh mục được cập nhật thành công");
       } else {
-        const newCategory = {
-          id: Date.now().toString(), // ID tạm thời dựa trên timestamp
-          ...categoryData,
-        };
+        const newCategory = await createCategory(categoryData);
         setCategories((prevCategories) => [...prevCategories, newCategory]);
-        toast.success("Danh mục được tạo mới thành công");
+        toast.success("Danh mục được tạo thành công");
       }
     } catch (error) {
       toast.error("Không thể lưu danh mục");
     } finally {
-      setIsFormOpen(false);
-      setIsLoading(false);
+      setIsFormOpen(false); // Đóng form sau khi hoàn thành
+      setIsLoading(false); // Set lại trạng thái loading
     }
   };
 
-  const handleDeleteCategory = (id) => {
-    setIsLoading(true);
+  const handleDeleteCategory = async (id) => {
     try {
+      await deleteCategory(id);
       setCategories((prevCategories) =>
         prevCategories.filter((category) => category.id !== id)
       );
-      toast.success("Danh mục đã được xóa thành công");
+      toast.success("Xóa danh mục thành công");
     } catch (error) {
-      toast.error("Không thể xóa danh mục");
+      toast.error("Failed to delete category");
     } finally {
       setDeleteModalOpen(false);
       setSelectedCategory(null);
-      setIsLoading(false);
     }
   };
 

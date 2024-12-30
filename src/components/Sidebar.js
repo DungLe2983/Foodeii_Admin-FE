@@ -51,21 +51,7 @@ const Sidebar = () => (
           <span>Categories</span>
         </NavLink>
       </li>
-      <li>
-        <NavLink
-          to='/suppliers'
-          className={({ isActive }) =>
-            `flex items-center space-x-2 py-4 pl-4 ${
-              isActive
-                ? "bg-gray-600 text-primary"
-                : "hover:bg-gray-600 hover:text-primary"
-            }`
-          }
-        >
-          <i className='ri-home-gear-fill'></i>
-          <span>Suppliers</span>
-        </NavLink>
-      </li>
+
       <li>
         <NavLink
           to='/products'

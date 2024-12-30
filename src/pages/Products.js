@@ -2,66 +2,47 @@ import React, { useEffect, useState } from "react";
 import ProductForm from "./Forms/ProductForm.js";
 import DeleteButton from "../components/DeleteButton.js";
 import toast from "react-hot-toast";
-
-const mockProducts = [
-  {
-    id: "1",
-    name: "Product 1",
-    supplier: { name: "Supplier A" },
-    categories: [{ name: "Category A" }, { name: "Category B" }],
-    stockQuantity: 50,
-    price: 100000,
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: "2",
-    name: "Product 2",
-    supplier: { name: "Supplier B" },
-    categories: [{ name: "Category C" }],
-    stockQuantity: 30,
-    price: 200000,
-    image: "https://via.placeholder.com/150",
-  },
-  // Add more mock products as needed
-];
-
-const mockSuppliers = [
-  { id: "1", name: "Supplier A" },
-  { id: "2", name: "Supplier B" },
-];
-
-const mockCategories = [
-  { id: "1", name: "Category A" },
-  { id: "2", name: "Category B" },
-];
+import {
+  fetchProducts,
+  createProduct,
+  editProduct,
+  deleteProduct,
+} from "../services/productService.js";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(8); // Number of items per page
+  const [checked, setChecked] = useState(false);
 
-  // Load mock data
-  useEffect(() => {
-    const fetchData = () => {
-      const totalItems = mockProducts.length;
+  // Fetch products from API
+  const loadProducts = async () => {
+    try {
+      const data = await fetchProducts(currentPage, pageSize);
+
+      // Set the total number of pages (for pagination)
+      const totalItems = data.length;
       setTotalPages(Math.ceil(totalItems / pageSize));
-      const startIndex = (currentPage - 1) * pageSize;
-      const paginatedProducts = mockProducts.slice(
-        startIndex,
-        startIndex + pageSize
-      );
-      setProducts(paginatedProducts);
-    };
+      console.log("Product===", data);
 
-    fetchData();
-  }, [currentPage, pageSize]);
+      setProducts(data);
+    } catch (error) {
+      console.error("Error loading products:", error);
+      toast.error("Failed to load products.");
+    }
+  };
+
+  // Fetch the products whenever the current page or page size changes
+  useEffect(() => {
+    loadProducts();
+  }, [currentPage, pageSize, checked]);
 
   // Filter products based on search term
   useEffect(() => {
@@ -75,13 +56,6 @@ const Products = () => {
     setEditData(null);
     setIsFormOpen(true);
   };
-  const reloadProducts = (newProduct) => {
-    setProducts((prev) =>
-      newProduct.id
-        ? prev.map((p) => (p.id === newProduct.id ? newProduct : p))
-        : [...prev, newProduct]
-    );
-  };
 
   const handleEditProduct = (product) => {
     setEditData(product);
@@ -93,12 +67,17 @@ const Products = () => {
     setDeleteModalOpen(true);
   };
 
-  const handleDeleteProduct = (id) => {
-    const updatedProducts = mockProducts.filter((product) => product.id !== id);
-    setProducts(updatedProducts);
-    toast.success("Product deleted successfully");
-    setDeleteModalOpen(false);
-    setSelectedProduct(null);
+  const handleDeleteProduct = async (id) => {
+    try {
+      await deleteProduct(id);
+      setProducts((prev) => prev.filter((product) => product.id !== id));
+      toast.success("Product deleted successfully");
+      setDeleteModalOpen(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Failed to delete product");
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -137,7 +116,7 @@ const Products = () => {
                 Name
               </th>
               <th className='px-4 py-2 text-left text-sm font-medium text-gray-600'>
-                Supplier
+                Description
               </th>
               <th className='px-4 py-2 text-left text-sm font-medium text-gray-600'>
                 Categories
@@ -163,12 +142,10 @@ const Products = () => {
                   {product.name}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {product.supplier.name}
+                  {product.description}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {product.categories
-                    .map((category) => category.name)
-                    .join(", ")}
+                  {product.category ? product.category.name : "No Category"}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   {product.stockQuantity}
@@ -181,7 +158,7 @@ const Products = () => {
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   <img
-                    src={product.image}
+                    src={product.imageUrl}
                     className='w-40 h-40 object-cover'
                     alt='product'
                   />
@@ -225,12 +202,11 @@ const Products = () => {
       {isFormOpen && (
         <ProductForm
           closeForm={() => setIsFormOpen(false)}
-          reload={reloadProducts}
+          reload={() => setChecked(!checked)}
           initialData={editData}
-          suppliers={mockSuppliers}
-          categories={mockCategories}
         />
       )}
+
       {deleteModalOpen && selectedProduct && (
         <DeleteButton
           onClose={() => setDeleteModalOpen(false)}

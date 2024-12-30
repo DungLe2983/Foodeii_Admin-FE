@@ -80,7 +80,7 @@ const SalesChart = ({ orders = [] }) => {
   };
 
   return (
-    <div className='w-full bg-white shadow-sm rounded-lg p-4 border border-gray-200'>
+    <div className='w-[95%] bg-white shadow-sm rounded-lg p-4 border border-gray-200'>
       <h2 className='text-lg font-semibold mb-4'>Sales Chart (VNĐ)</h2>
       {chartData.labels.length > 0 ? (
         <Line data={chartData} options={options} />

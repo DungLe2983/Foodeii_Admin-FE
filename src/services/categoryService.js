@@ -2,54 +2,50 @@ import axios from "axios";
 
 export const getAllCategories = async () => {
   try {
-    const response = await axios.get("https://localhost:44392/api/Category");
+    const response = await axios.get(
+      "http://localhost:8080/FoodStore_war_exploded/api/categories"
+    );
     return response.data;
   } catch (error) {
-    console.log("Failed to fetch Category");
+    console.error("Error fetching categories:", error);
+    throw error;
   }
 };
-
-export const createCategory = async (data) => {
+export const createCategory = async (categoryData) => {
   try {
     const response = await axios.post(
-      "https://localhost:44392/api/Category",
-      data
+      "http://localhost:8080/FoodStore_war_exploded/api/categories",
+      categoryData
     );
-    return response.data;
+    return response.data; // Trả về dữ liệu trả về từ server
   } catch (error) {
-    console.log("Failed to creating Category");
-  }
-};
-export const getCategoryById = async (id) => {
-  try {
-    const response = await axios.get(
-      `https://localhost:44392/api/Category/${id}`
-    );
-    return response.data;
-  } catch (error) {
-    console.log("Failed to get Category");
+    console.error("Error creating category:", error);
+    throw error;
   }
 };
 
-export const updateCategoryById = async (id, data) => {
+export const updateCategory = async (categoryId, categoryData) => {
   try {
     const response = await axios.put(
-      `https://localhost:44392/api/Category/${id}`,
-      data
+      `http://localhost:8080/FoodStore_war_exploded/api/categories/${categoryId}`,
+      categoryData
     );
-    return response.data;
+    return response.data; // Trả về dữ liệu trả về từ server
   } catch (error) {
-    console.log("Failed to update Category");
+    console.error("Error updating category:", error);
+    throw error;
   }
 };
 
-export const deleteCategory = async (id) => {
+// Xóa danh mục
+export const deleteCategory = async (categoryId) => {
   try {
     const response = await axios.delete(
-      `https://localhost:44392/api/Category/${id}`
+      `http://localhost:8080/FoodStore_war_exploded/api/categories/${categoryId}`
     );
-    return response.data;
+    return response.data; // Trả về dữ liệu trả về từ server
   } catch (error) {
-    console.log("Failed to delete Category");
+    console.error("Error deleting category:", error);
+    throw error;
   }
 };

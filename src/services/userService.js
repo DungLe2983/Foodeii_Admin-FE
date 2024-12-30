@@ -1,44 +1,47 @@
+// src/services/userService.js
 import axios from "axios";
 
-export const getAllUsers = async () => {
-  try {
-    const response = await axios.get("https://localhost:44392/api/Profile");
-    return response.data;
-  } catch (error) {
-    console.log("Failed to fetch Profile");
-  }
-};
+const API_URL = "http://localhost:8080/FoodStore_war_exploded/api/users";
 
-export const getUserById = async (id) => {
+// Lấy danh sách người dùng
+export const getUsers = async () => {
   try {
     const response = await axios.get(
-      `https://localhost:44392/api/Profile/${id}`
+      "http://localhost:8080/FoodStore_war_exploded/api/users"
     );
-    return response.data;
+    return response.data; // Dữ liệu trả về từ API
   } catch (error) {
-    console.log("Failed to get Profile by ID");
+    console.error("Error fetching users:", error);
+    throw error;
   }
 };
 
-export const updateUserById = async (id, data) => {
+// Cập nhật người dùng
+export const updateUser = async (id, userData) => {
   try {
     const response = await axios.put(
-      `https://localhost:44392/api/Profile/${id}`,
-      data
+      `http://localhost:8080/FoodStore_war_exploded/api/users/profile/${id}`,
+      userData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
     return response.data;
   } catch (error) {
-    console.log("Failed to update Profile");
+    console.error("Error updating user:", error);
+    throw error;
   }
 };
 
+// Xóa người dùng
 export const deleteUser = async (id) => {
   try {
-    const response = await axios.delete(
-      `https://localhost:44392/api/Profile/${id}`
-    );
+    const response = await axios.delete(`${API_URL}/${id}`);
     return response.data;
   } catch (error) {
-    console.log("Failed to delete Profile");
+    console.error("Error deleting user:", error);
+    throw error;
   }
 };

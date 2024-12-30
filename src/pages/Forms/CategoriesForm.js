@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 
+
 const CategoriesForm = ({ closeForm, onSubmit, initialData = null }) => {
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Cập nhật form với dữ liệu khi chỉnh sửa
   useEffect(() => {
     if (initialData) {
       setCategoryName(initialData.name || "");
       setCategoryDescription(initialData.description || "");
     }
   }, [initialData]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,8 +67,9 @@ const CategoriesForm = ({ closeForm, onSubmit, initialData = null }) => {
             <button
               type='submit'
               className='px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600'
+              disabled={isLoading}
             >
-              Save
+              {isLoading ? "Saving..." : "Save"}
             </button>
           </div>
         </form>

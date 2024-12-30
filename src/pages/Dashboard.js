@@ -74,7 +74,7 @@ const Dashboard = () => {
           icon='ri-user-fill'
         />
         <DataCard
-          title='Total Books'
+          title='Total Products'
           number={dataCounts.totalBooks}
           icon='ri-price-tag-3-fill'
         />
@@ -84,7 +84,7 @@ const Dashboard = () => {
           icon='ri-layout-2-fill'
         />
         <DataCard
-          title='Total Authors'
+          title='Total Suppliers'
           number={dataCounts.totalAuthors}
           icon='ri-book-open-fill'
         />

@@ -1,34 +1,40 @@
 import React, { useState, useEffect } from "react";
 
 const UserForm = ({ closeForm, onSubmit, initialData = null }) => {
-  const [userName, setUserName] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [oldPassword, setOldPassword] = useState(""); 
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     if (initialData) {
-      setUserName(initialData.userName || "");
-      setFullName(initialData.fullName || "");
+      setName(initialData.name || "");
       setAddress(initialData.address || "");
-      setPhoneNumber(initialData.phoneNumber || "");
+      setPhone(initialData.phone || "");
+      setEmail(initialData.email || "");
+      setRole(initialData.role || "");
     }
   }, [initialData]);
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const formData = {
-      userName,
+      name,
+      address,
+      phone,
+      email, // Include email in the form data
+      role, // Include role in the form data
       oldPassword,
       newPassword,
-      fullName,
-      address,
-      phoneNumber,
     };
-    onSubmit(formData);
-    closeForm();
+
+    onSubmit(formData); // Submit the form data
+    closeForm(); // Close the form after submission
   };
 
   return (
@@ -38,52 +44,63 @@ const UserForm = ({ closeForm, onSubmit, initialData = null }) => {
           {initialData ? "Edit User" : "Create User"}
         </h2>
         <form onSubmit={handleSubmit}>
-          <div className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700'>
-              Username
-            </label>
-            <input
-              type='text'
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
-              required
-            />
-          </div>
-          <div className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700'>
-              Old Password
-            </label>
-            <input
-              type='text'
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
-            />
-          </div>
-          <div className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700'>
-              New Password
-            </label>
-            <input
-              type='text'
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
-            />
-          </div>
+          {/* Full Name */}
           <div className='mb-4'>
             <label className='block text-sm font-medium text-gray-700'>
               Full Name
             </label>
             <input
               type='text'
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
               required
             />
           </div>
+
+          {/* Email */}
+          <div className='mb-4'>
+            <label className='block text-sm font-medium text-gray-700'>
+              Email
+            </label>
+            <input
+              type='email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
+              required
+            />
+          </div>
+
+          {/* Role */}
+          <div className='mb-4'>
+            <label className='block text-sm font-medium text-gray-700'>
+              Role
+            </label>
+            <input
+              type='role'
+              value={role}
+              readOnly
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
+              required
+            />
+          </div>
+
+          {/* Phone Number */}
+          <div className='mb-4'>
+            <label className='block text-sm font-medium text-gray-700'>
+              Phone Number
+            </label>
+            <input
+              type='text'
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
+              required
+            />
+          </div>
+
+          {/* Address */}
           <div className='mb-4'>
             <label className='block text-sm font-medium text-gray-700'>
               Address
@@ -95,18 +112,33 @@ const UserForm = ({ closeForm, onSubmit, initialData = null }) => {
               className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
             />
           </div>
+
+          {/* Old Password */}
           <div className='mb-4'>
             <label className='block text-sm font-medium text-gray-700'>
-              Phone Number
+              Old Password
             </label>
             <input
-              type='text'
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              type='password'
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
               className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
-              required
             />
           </div>
+
+          {/* New Password */}
+          <div className='mb-4'>
+            <label className='block text-sm font-medium text-gray-700'>
+              New Password
+            </label>
+            <input
+              type='password'
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
+            />
+          </div>
+
           <div className='flex justify-end'>
             <button
               type='button'
