@@ -1,83 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import OrderForm from "./Forms/OrderForm";
 import DeleteButton from "../components/DeleteButton.js";
 import toast from "react-hot-toast";
-
-// Mock data
-const mockOrders = [
-  {
-    id: 1,
-    orderDate: "2024-12-15",
-    userName: "Nguyễn Văn A",
-    address: "123 Nguyễn Du, Q1, TP.HCM",
-    phoneNumber: "0901234567",
-    orderItems: [
-      {
-        id: 1,
-        name: "Rau cải ngọt hữu cơ",
-        quantity: 2,
-        price: 25000,
-      },
-      {
-        id: 2,
-        name: "Cà rốt hữu cơ",
-        quantity: 1,
-        price: 35000,
-      },
-    ],
-    totalAmount: 85000,
-    status: "Completed",
-  },
-  {
-    id: 2,
-    orderDate: "2024-12-16",
-    userName: "Trần Thị B",
-    address: "456 Lê Lợi, Q5, TP.HCM",
-    phoneNumber: "0907654321",
-    orderItems: [
-      {
-        id: 3,
-        name: "Thịt heo hữu cơ",
-        quantity: 1,
-        price: 150000,
-      },
-    ],
-    totalAmount: 150000,
-    status: "Processing",
-  },
-];
+import { getAllOrders, deleteOrder } from "../services/orderService";
 
 const Orders = () => {
-  const [orders, setOrders] = useState(mockOrders);
+  const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // Lấy danh sách đơn hàng từ API khi component được mount
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await getAllOrders();
+        console.log("Orders===", data);
+        setOrders(data);
+      } catch (error) {
+        toast.error("Có lỗi xảy ra khi kết nối với máy chủ");
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  // Xử lý khi chỉnh sửa đơn hàng
   const handleEditOrder = (order) => {
     setEditData(order);
     setIsFormOpen(true);
   };
 
+  // Xác nhận xóa đơn hàng
   const confirmDeleteOrder = (order) => {
     setSelectedOrder(order);
     setDeleteModalOpen(true);
   };
 
-  const handleDeleteOrder = (orderId) => {
-    setOrders((prevOrders) =>
-      prevOrders.filter((order) => order.id !== orderId)
-    );
-    setDeleteModalOpen(false);
-    toast.success("Đã xóa đơn hàng thành công");
+  // Xóa đơn hàng
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      const success = await deleteOrder(orderId);
+      if (success) {
+        setOrders((prevOrders) =>
+          prevOrders.filter((order) => order.id !== orderId)
+        );
+        setDeleteModalOpen(false);
+        toast.success("Đã xóa đơn hàng thành công");
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi xóa đơn hàng");
+    }
   };
 
-  const filteredOrders = orders.filter(
-    (order) =>
-      order.orderDate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  // Lọc đơn hàng theo từ khóa tìm kiếm
+  const filteredOrders = orders.filter((order) =>
+    order.createdAt.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -135,19 +115,19 @@ const Orders = () => {
                 } hover:bg-gray-100 transition-colors`}
               >
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {format(new Date(order.orderDate), "dd/MM/yyyy")}
+                  {format(new Date(order.createdAt), "dd/MM/yyyy")}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {order.userName}
+                  {order.user?.name}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {order.address}
+                  {order.user?.address}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {order.phoneNumber}
+                  {order.user?.phone}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
-                  {order.orderItems.length}
+                  {order.orderProducts.length}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   {order.totalAmount.toLocaleString()} đ
@@ -160,7 +140,7 @@ const Orders = () => {
                         : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {order.status === "Completed" ? "Hoàn thành" : "Đang xử lý"}
+                    {order.status === "PENDING" ? "Đang xử lý" : "Hoàn thành"}
                   </span>
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700 flex space-x-4'>
@@ -188,7 +168,7 @@ const Orders = () => {
       {isFormOpen && (
         <OrderForm
           closeForm={() => setIsFormOpen(false)}
-          reload={() => setOrders(mockOrders)}
+          reload={() => setOrders(orders)} // reload lại orders sau khi thay đổi
           initialData={editData}
         />
       )}
