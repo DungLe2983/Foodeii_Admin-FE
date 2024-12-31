@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import ProductForm from "./Forms/ProductForm.js";
 import DeleteButton from "../components/DeleteButton.js";
 import toast from "react-hot-toast";
-import {
-  fetchProducts,
-  createProduct,
-  editProduct,
-  deleteProduct,
-} from "../services/productService.js";
+import { fetchProducts, deleteProduct } from "../services/productService.js";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -17,22 +12,18 @@ const Products = () => {
   const [editData, setEditData] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize] = useState(8); // Number of items per page
+
+  const [pageSize] = useState(8);
   const [checked, setChecked] = useState(false);
 
-  // Fetch products from API
   const loadProducts = async () => {
     try {
-      const data = await fetchProducts(currentPage, pageSize);
-
-      // Set the total number of pages (for pagination)
-      const totalItems = data.length;
-      setTotalPages(Math.ceil(totalItems / pageSize));
-      console.log("Product===", data);
+      const data = await fetchProducts();
 
       setProducts(data);
+      setFilteredProducts(data);
     } catch (error) {
       console.error("Error loading products:", error);
       toast.error("Failed to load products.");
@@ -80,10 +71,17 @@ const Products = () => {
     }
   };
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
+  const indexOfLastProduct = currentPage * pageSize;
+  const indexOfFirstProduct = indexOfLastProduct - pageSize;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+
+  const handlePageClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -136,7 +134,7 @@ const Products = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
+            {currentProducts.map((product) => (
               <tr key={product.id} className='border-b hover:bg-gray-50'>
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   {product.name}
@@ -159,7 +157,7 @@ const Products = () => {
                 <td className='px-4 py-3 text-sm text-gray-700'>
                   <img
                     src={product.imageUrl}
-                    className='w-40 h-40 object-cover'
+                    className='w-80 h-40 object-contain'
                     alt='product'
                   />
                 </td>
@@ -184,19 +182,21 @@ const Products = () => {
       </div>
 
       <div className='flex justify-center items-center mt-4 space-x-2'>
-        {[...Array(totalPages).keys()].map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page + 1)}
-            className={`px-4 py-2 border rounded ${
-              page + 1 === currentPage
-                ? "bg-green-600 text-white"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-          >
-            {page + 1}
-          </button>
-        ))}
+        {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+          (pageNumber) => (
+            <button
+              key={pageNumber}
+              onClick={() => handlePageClick(pageNumber)}
+              className={`px-4 py-2 ${
+                currentPage === pageNumber
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-200"
+              } text-gray-700`}
+            >
+              {pageNumber}
+            </button>
+          )
+        )}
       </div>
 
       {isFormOpen && (

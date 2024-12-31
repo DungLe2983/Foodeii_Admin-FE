@@ -1,15 +1,9 @@
 import axios from "axios";
 
-export const fetchProducts = async (page, pageSize) => {
+export const fetchProducts = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:8080/FoodStore_war_exploded/api/products",
-      {
-        params: {
-          page: page,
-          pageSize: pageSize,
-        },
-      }
+      "http://localhost:8080/FoodStore_war_exploded/api/products"
     );
     return response.data;
   } catch (error) {
