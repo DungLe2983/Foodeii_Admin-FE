@@ -12,6 +12,7 @@ const Orders = () => {
   const [editData, setEditData] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [checked, setChecked] = useState(false);
 
   // Lấy danh sách đơn hàng từ API khi component được mount
   useEffect(() => {
@@ -25,7 +26,7 @@ const Orders = () => {
       }
     };
     fetchOrders();
-  }, []);
+  }, [checked]);
 
   // Xử lý khi chỉnh sửa đơn hàng
   const handleEditOrder = (order) => {
@@ -140,7 +141,7 @@ const Orders = () => {
                         : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {order.status === "PENDING" ? "Đang xử lý" : "Hoàn thành"}
+                    {order.status}
                   </span>
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700 flex space-x-4'>
@@ -168,7 +169,7 @@ const Orders = () => {
       {isFormOpen && (
         <OrderForm
           closeForm={() => setIsFormOpen(false)}
-          reload={() => setOrders(orders)} // reload lại orders sau khi thay đổi
+          reload={() => setChecked(!checked)}
           initialData={editData}
         />
       )}

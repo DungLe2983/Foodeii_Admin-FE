@@ -110,7 +110,7 @@ const Categories = () => {
           onClick={handleCreateCategory}
           className='bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition'
         >
-          Thêm Danh Mục
+          Create Category
         </button>
       </div>
 

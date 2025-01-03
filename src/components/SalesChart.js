@@ -28,7 +28,7 @@ const SalesChart = ({ orders = [] }) => {
       );
 
       const salesByDate = completedOrders.reduce((acc, order) => {
-        const orderDate = format(new Date(order.orderDate), "dd/MM/yyyy");
+        const orderDate = format(new Date(order.createdAt), "dd/MM/yyyy");
         acc[orderDate] = (acc[orderDate] || 0) + order.totalAmount;
         return acc;
       }, {});
